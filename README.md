@@ -1,5 +1,5 @@
 # vault-policies
-A tool to synchronize your vault policies from your code repository with your server.
+A simple tool to synchronize your vault policies from your code repository with your server.
 
 # Install
 
@@ -13,7 +13,7 @@ If you are already using vault, it is likely that you have setup some policies. 
 ```
 $ vault login
 [...]
-$ vault-policies import your/directory
+$ vault-policies import toyour/directory
 ```
 
 ## Seting rules on your server
@@ -21,14 +21,14 @@ If you do not want any rules to be removed and just update the rules you have de
 ```
 $ vault login
 [...]
-$ vault-policies export your/directory
+$ vault-policies export fromyour/directory
 ```
 
 If you want to have the rules set on your server to exactly and strictly match the one defined in your directory, you should use the _sync_ command as follow:
 ```
 $ vault login
 [...]
-$ vault-policies sync your/directory
+$ vault-policies sync fromyour/directory
 ```
 
 # License
