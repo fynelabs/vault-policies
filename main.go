@@ -130,28 +130,7 @@ func exportPolicies(dev, dryRun bool, directory string) error {
 
 	log("Walking directory %s", directory)
 	defer log("Done exporting policies from %s", directory)
-	return filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if filepath.Ext(path) != ".hcl" {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		// Guess the policy name from the file name
-		policy := filepath.Base(path)
-		policy = policy[:len(policy)-len(filepath.Ext(policy))]
-
+	return walkPoliciesDirectory(directory, func(policy string, content []byte) error {
 		if dryRun {
 			fmt.Printf("Would have written policy %s with content:\n", policy)
 			fmt.Println(string(content))
@@ -192,31 +171,9 @@ func synchronizePolicies(dev, dryRun bool, directory string) error {
 	localPolicies := make(map[string]string)
 
 	log("Walking directory %s", directory)
-	err = filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		if filepath.Ext(path) != ".hcl" {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return err
-		}
-
-		// Guess the policy name from the file name
-		policy := filepath.Base(path)
-		policy = policy[:len(policy)-len(filepath.Ext(policy))]
-
+	err = walkPoliciesDirectory(directory, func(policy string, content []byte) error {
 		log("Found policy %s", policy)
 		localPolicies[policy] = string(content)
-
 		return nil
 	})
 	if err != nil {
@@ -253,6 +210,33 @@ func synchronizePolicies(dev, dryRun bool, directory string) error {
 
 	log("Done synchronizing policies")
 	return nil
+}
+
+func walkPoliciesDirectory(directory string, f func(policy string, content []byte) error) error {
+	return filepath.Walk(directory, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		if filepath.Ext(path) != ".hcl" {
+			return nil
+		}
+
+		content, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// Guess the policy name from the file name
+		policy := filepath.Base(path)
+		policy = policy[:len(policy)-len(filepath.Ext(policy))]
+
+		return f(policy, content)
+	})
 }
 
 func newVault(address string, token string, CAPath string, ClientCert string, ClientKey string) (*vaultApi.Client, error) {
