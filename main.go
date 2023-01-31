@@ -86,7 +86,7 @@ func main() {
 }
 
 func importPolicies(dev, dryRun bool, directory string) error {
-	log("Importing policies from %s", directory)
+	log("Importing policies from", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func importPolicies(dev, dryRun bool, directory string) error {
 			fmt.Printf("Would have written %s.hcl with content:\n", policy)
 			fmt.Println(content)
 		} else {
-			log("Writing %s.hcl", policy)
+			log(fmt.Sprintf("Writing %s.hcl", policy))
 			err = os.WriteFile(filepath.Join(directory, policy+".hcl"), []byte(content), 0644)
 			if err != nil {
 				return err
@@ -109,25 +109,25 @@ func importPolicies(dev, dryRun bool, directory string) error {
 		return err
 	}
 
-	log("Done importing policies to %s", directory)
+	log("Done importing policies to", directory)
 	return nil
 }
 
 func exportPolicies(dev, dryRun bool, directory string) error {
-	log("Exporting policies from %s", directory)
+	log("Exporting policies from", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
 	}
 
-	log("Walking directory %s", directory)
-	defer log("Done exporting policies from %s", directory)
+	log("Walking directory", directory)
+	defer log("Done exporting policies from", directory)
 	return walkDirectoryPolicies(directory, func(policy string, content []byte) error {
 		if dryRun {
 			fmt.Printf("Would have written policy %s with content:\n", policy)
 			fmt.Println(string(content))
 		} else {
-			log("Setting policy %s", policy)
+			log("Setting policy", policy)
 			client.Sys().PutPolicy(policy, string(content))
 		}
 
@@ -136,7 +136,7 @@ func exportPolicies(dev, dryRun bool, directory string) error {
 }
 
 func synchronizePolicies(dev, dryRun bool, directory string) error {
-	log("Synchronizing policies from %s", directory)
+	log("Synchronizing policies from", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
@@ -154,9 +154,9 @@ func synchronizePolicies(dev, dryRun bool, directory string) error {
 
 	localPolicies := make(map[string]string)
 
-	log("Walking directory %s", directory)
+	log("Walking directory", directory)
 	err = walkDirectoryPolicies(directory, func(policy string, content []byte) error {
-		log("Found policy %s", policy)
+		log("Found policy", policy)
 		localPolicies[policy] = string(content)
 		return nil
 	})
@@ -187,7 +187,7 @@ func synchronizePolicies(dev, dryRun bool, directory string) error {
 			fmt.Printf("Would have written policy %s with content:\n", policy)
 			fmt.Println(localPolicies[policy])
 		} else {
-			log("Setting policy %s", policy)
+			log("Setting policy", policy)
 			client.Sys().PutPolicy(policy, localPolicies[policy])
 		}
 	}
@@ -231,7 +231,7 @@ func walkRemotePolicies(client *vaultApi.Client, f func(policy string, content s
 	}
 
 	for _, policy := range policies {
-		log("Getting policy %s", policy)
+		log("Getting policy", policy)
 		content, err := client.Sys().GetPolicy(policy)
 		if err != nil {
 			return err
