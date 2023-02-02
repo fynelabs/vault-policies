@@ -9,26 +9,28 @@ $ go install github.com/fynelabs/vault-policies@latest
 ```
 
 ## Initialize
-If you are already using vault, it is likely that you have setup some policies. You might want to get them locally as a starting point. To do so, you can do the following:
+If you are already using vault, it is likely that you have setup some policies. You might want to get them locally as a starting point. To do so, you can do the following with the _backup_ command:
 ```
 $ vault login
 [...]
-$ vault-policies import toyour/directory
+$ vault-policies backup toyour/directory
 ```
+
+This can also be useful for regularly getting a snapshot of the policies in production for audit or just backup.
 
 ## Seting rules on your server
-If you do not want any rules to be removed and just update the rules you have defined in your directory, you should use the _export_ command as follow:
+If you do not want any rules to be removed and just update the rules you have defined in your directory to be replicated on your vault instance, you should use the _upload_ command as follow:
 ```
 $ vault login
 [...]
-$ vault-policies export fromyour/directory
+$ vault-policies upload fromyour/directory
 ```
 
-If you want to have the rules set on your server to exactly and strictly match the one defined in your directory, you should use the _sync_ command as follow:
+If you want to have the rules set on your server to exactly and strictly match the one defined in your directory, you should use the _restore_ command as follow:
 ```
 $ vault login
 [...]
-$ vault-policies sync fromyour/directory
+$ vault-policies restore fromyour/directory
 ```
 
 # License

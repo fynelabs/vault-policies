@@ -18,7 +18,7 @@ func main() {
 	app := &cli.App{
 		Name:        "vault-policies",
 		Usage:       "An helper to keep vault policies in sync with your code.",
-		Description: "vault-policies is a tool to keep your vault policies in sync with your code and easier to integrate in your release process.",
+		Description: "vault-policies is a tool to keep your vault policies synchronized with your code and easier to integrate in your release process.",
 		Flags: []cli.Flag{
 			&cli.BoolFlag{
 				Name:        "dev",
@@ -38,42 +38,42 @@ func main() {
 		},
 		Commands: []*cli.Command{
 			{
-				Name:  "import",
-				Usage: "Import policies from a Vault into the specified directory",
+				Name:  "backup",
+				Usage: "Backup your policies from a Vault into the specified local directory",
 				Action: func(c *cli.Context) error {
 					if len(c.Args().Slice()) != 1 {
-						return fmt.Errorf("import requires a directory")
+						return fmt.Errorf("backup requires a directory")
 					}
 
 					directory := c.Args().Slice()[0]
 
-					return importPolicies(dev, dryRun, directory)
+					return backupPolicies(dev, dryRun, directory)
 				},
 			},
 			{
-				Name:  "export",
-				Usage: "Export policies from a directory into Vault (will overwrite existing policies, but won't remove any existing policies)",
+				Name:  "upload",
+				Usage: "Upload policies from a directory into Vault (will overwrite existing policies, but won't remove any existing policies)",
 				Action: func(c *cli.Context) error {
 					if len(c.Args().Slice()) != 1 {
-						return fmt.Errorf("export requires a directory")
+						return fmt.Errorf("upload requires a directory")
 					}
 
 					directory := c.Args().Slice()[0]
 
-					return exportPolicies(dev, dryRun, directory)
+					return uploadPolicies(dev, dryRun, directory)
 				},
 			},
 			{
-				Name:  "sync",
-				Usage: "Synchronize policies from a directory into Vault (will overwrite existing policies, and remove any existing policies not present in the directory)",
+				Name:  "restore",
+				Usage: "Restore your policies from a local directory into Vault (will overwrite existing policies, and remove any existing policies not present in the local directory)",
 				Action: func(c *cli.Context) error {
 					if len(c.Args().Slice()) != 1 {
-						return fmt.Errorf("sync requires a directory")
+						return fmt.Errorf("restore requires a directory")
 					}
 
 					directory := c.Args().Slice()[0]
 
-					return synchronizePolicies(dev, dryRun, directory)
+					return restorePolicies(dev, dryRun, directory)
 				},
 			},
 		},
@@ -85,8 +85,8 @@ func main() {
 	}
 }
 
-func importPolicies(dev, dryRun bool, directory string) error {
-	log("Importing policies from", directory)
+func backupPolicies(dev, dryRun bool, directory string) error {
+	log("Backing policies to", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
@@ -109,19 +109,19 @@ func importPolicies(dev, dryRun bool, directory string) error {
 		return err
 	}
 
-	log("Done importing policies to", directory)
+	log("Done backing up")
 	return nil
 }
 
-func exportPolicies(dev, dryRun bool, directory string) error {
-	log("Exporting policies from", directory)
+func uploadPolicies(dev, dryRun bool, directory string) error {
+	log("Uploading policies from", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
 	}
 
 	log("Walking directory", directory)
-	defer log("Done exporting policies from", directory)
+	defer log("Done uploading policies")
 	return walkDirectoryPolicies(directory, func(policy string, content []byte) error {
 		if dryRun {
 			fmt.Printf("Would have written policy %s with content:\n", policy)
@@ -135,8 +135,8 @@ func exportPolicies(dev, dryRun bool, directory string) error {
 	})
 }
 
-func synchronizePolicies(dev, dryRun bool, directory string) error {
-	log("Synchronizing policies from", directory)
+func restorePolicies(dev, dryRun bool, directory string) error {
+	log("Restoring policies from", directory)
 	client, err := selectNewVault(dev)
 	if err != nil {
 		return err
@@ -192,7 +192,7 @@ func synchronizePolicies(dev, dryRun bool, directory string) error {
 		}
 	}
 
-	log("Done synchronizing policies")
+	log("Done restoring policies")
 	return nil
 }
 
